@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import dev.olvex.core.AndroidOlvex
 import dev.olvex.demo.App
+import dev.olvex.demo.DemoConfig
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,7 +17,7 @@ class MainActivity : ComponentActivity() {
 
         AndroidOlvex.init(
             context = this,
-            apiKey = "YOUR_OLVEX_API_KEY" // Get your key at olvex.dev
+            apiKey = DemoConfig.apiKey // Get your key at olvex.dev
         )
 
         setContent {

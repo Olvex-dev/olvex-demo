@@ -26,7 +26,7 @@ Olvex is built for KMP from the ground up:
 
 1. Clone this repo
 2. Open in Android Studio
-3. Paste your API key in `composeApp/src/androidMain/kotlin/MainApplication.kt`
+3. Paste your API key in `composeApp/src/commonMain/kotlin/dev/olvex/DemoConfig.kt`
 4. Run on Android emulator or device
 5. Open your [dashboard](https://olvex.dev/app) and watch events appear
 
@@ -36,7 +36,7 @@ Add to your `shared` module `build.gradle.kts`:
 
 ```kotlin
 commonMain.dependencies {
-    implementation("dev.olvex:sdk:0.1.0-alpha01")
+    implementation("dev.olvex:sdk:0.1.0-alpha7")
 }
 ```
 
@@ -144,12 +144,13 @@ git clone https://github.com/Olvex-dev/olvex-demo
 cd olvex-demo
 ```
 
-Open in Android Studio, paste your API key in `composeApp/src/commonMain/kotlin/App.kt`, and run.
+Open in Android Studio, paste your API key in `composeApp/src/commonMain/kotlin/dev/olvex/DemoConfig.kt`, and run.
 
 The test bench lets you:
 - Start/end sessions
-- Send custom events
-- Trigger a crash and watch it appear in the dashboard after restart
+- Send custom events (including events with properties)
+- Trigger a Kotlin crash and watch it appear in the dashboard after restart
+- Trigger `SIGABRT` native crash on iOS to verify signal-based capture
 
 ---
 
