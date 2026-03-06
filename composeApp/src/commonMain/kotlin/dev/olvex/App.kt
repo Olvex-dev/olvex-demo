@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.olvex.core.Olvex
+import dev.olvex.getPlatform
 
 private val Green = Color(0xFF4ade80)
 private val Blue = Color(0xFF60a5fa)
@@ -25,9 +26,10 @@ private val SubMuted = Color(0xFF6b7c6b)
 fun App() {
     var customEventName by remember { mutableStateOf("") }
     var log by remember { mutableStateOf(listOf<String>()) }
+    val platformName = remember { getPlatform().name }
 
     fun addLog(msg: String) {
-        log = listOf(msg) + log
+        log = listOf(msg) + log.take(199)
     }
 
     MaterialTheme {
@@ -49,7 +51,13 @@ fun App() {
                     "SDK Demo",
                     color = SubMuted,
                     fontSize = 14.sp,
-                    modifier = Modifier.padding(bottom = 32.dp)
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    platformName,
+                    color = SubMuted,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(bottom = 28.dp)
                 )
 
                 // ── Sessions ──────────────────────────────────────────
@@ -57,12 +65,12 @@ fun App() {
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OlvexButton("Start Session", Green) {
-                        Olvex.track("session_start")
-                        addLog("✓ Session started")
+                        Olvex.startSession()
+                        addLog("✓ Session started via Olvex.startSession()")
                     }
                     OlvexButton("End Session", Green) {
-                        Olvex.track("session_end")
-                        addLog("✓ Session ended")
+                        Olvex.endSession()
+                        addLog("✓ Session ended via Olvex.endSession()")
                     }
                 }
 
@@ -99,6 +107,23 @@ fun App() {
                         customEventName = ""
                     }
                 }
+                Spacer(Modifier.height(8.dp))
+                OlvexButton(
+                    text = "Track Event With Properties",
+                    color = Blue,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    val name = customEventName.trim().ifBlank { "demo_event_with_props" }
+                    Olvex.track(
+                        name = name,
+                        properties = mapOf(
+                            "screen" to "demo_test_bench",
+                            "platform" to platformName,
+                            "case" to "custom_event_with_properties"
+                        )
+                    )
+                    addLog("✓ CustomEvent '$name' with properties sent")
+                }
 
                 Spacer(Modifier.height(24.dp))
 
@@ -106,13 +131,31 @@ fun App() {
                 SectionLabel("Crash")
                 Spacer(Modifier.height(8.dp))
                 OlvexButton(
-                    text = "Force Crash",
+                    text = "Force Kotlin Crash",
                     color = Red,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     addLog("💥 Forcing crash — relaunch to see it in dashboard")
                     throw RuntimeException("Olvex test crash — intentional")
                 }
+                if (supportsNativeSignalCrashTest) {
+                    Spacer(Modifier.height(8.dp))
+                    OlvexButton(
+                        text = "Force Native SIGABRT (iOS)",
+                        color = Red,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        addLog("💥 Forcing SIGABRT — relaunch to see native crash in dashboard")
+                        triggerNativeSignalCrash()
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Crash reports are sent on next app launch.",
+                    color = SubMuted,
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace
+                )
 
                 Spacer(Modifier.height(32.dp))
 
