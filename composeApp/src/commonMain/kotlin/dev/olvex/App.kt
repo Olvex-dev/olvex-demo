@@ -22,14 +22,62 @@ private val CardBg = Color(0xFF0d160d)
 private val Muted = Color(0xFF3a5c3a)
 private val SubMuted = Color(0xFF6b7c6b)
 
+private enum class VerificationStatus(val label: String, val color: Color) {
+    NOT_STARTED("Not started", SubMuted),
+    IN_PROGRESS("In progress", Blue),
+    PASSED("Passed", Green),
+    FAILED("Failed", Red)
+}
+
+private data class VerificationScenario(
+    val id: String,
+    val title: String,
+    val expected: String
+)
+
+private val verificationScenarios = listOf(
+    VerificationScenario(
+        id = "offline_queue",
+        title = "Offline queue persistence",
+        expected = "Events generated offline must appear after network recovery."
+    ),
+    VerificationScenario(
+        id = "retry_recovery",
+        title = "Retry after network failure",
+        expected = "Transient backend/network failures should recover without event loss."
+    ),
+    VerificationScenario(
+        id = "restart_recovery",
+        title = "Restart delivery recovery",
+        expected = "Queued events should survive app restart and be delivered on next launch."
+    ),
+    VerificationScenario(
+        id = "crash_restore",
+        title = "Crash restore on next launch",
+        expected = "Forced crash must be visible in dashboard after relaunch."
+    )
+)
+
 @Composable
 fun App() {
     var customEventName by remember { mutableStateOf("") }
     var log by remember { mutableStateOf(listOf<String>()) }
+    var scenarioStatuses by remember {
+        mutableStateOf(
+            verificationScenarios.associate { it.id to VerificationStatus.NOT_STARTED }
+        )
+    }
     val platformName = remember { getPlatform().name }
 
     fun addLog(msg: String) {
         log = listOf(msg) + log.take(199)
+    }
+
+    fun updateScenarioStatus(id: String, status: VerificationStatus) {
+        scenarioStatuses = scenarioStatuses.toMutableMap().apply {
+            this[id] = status
+        }
+        addLog("Matrix '${id}' → ${status.label}")
     }
 
     MaterialTheme {
@@ -157,6 +205,54 @@ fun App() {
                     fontFamily = FontFamily.Monospace
                 )
 
+                Spacer(Modifier.height(24.dp))
+
+                // ── Verification matrix ─────────────────────────────
+                SectionLabel("Verification Matrix")
+                Spacer(Modifier.height(8.dp))
+                Surface(
+                    color = CardBg,
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        verificationScenarios.forEach { scenario ->
+                            val status = scenarioStatuses[scenario.id] ?: VerificationStatus.NOT_STARTED
+                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        scenario.title,
+                                        color = Color.White,
+                                        fontSize = 13.sp,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                    Text(
+                                        status.label,
+                                        color = status.color,
+                                        fontSize = 11.sp,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
+                                Text(
+                                    scenario.expected,
+                                    color = SubMuted,
+                                    fontSize = 11.sp,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    MatrixButton("Start", Blue) { updateScenarioStatus(scenario.id, VerificationStatus.IN_PROGRESS) }
+                                    MatrixButton("Pass", Green) { updateScenarioStatus(scenario.id, VerificationStatus.PASSED) }
+                                    MatrixButton("Fail", Red) { updateScenarioStatus(scenario.id, VerificationStatus.FAILED) }
+                                    MatrixButton("Reset", SubMuted) { updateScenarioStatus(scenario.id, VerificationStatus.NOT_STARTED) }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 Spacer(Modifier.height(32.dp))
 
                 // ── Event log ──────────────────────────────────────────
@@ -193,6 +289,27 @@ fun App() {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun MatrixButton(
+    text: String,
+    color: Color,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(containerColor = color.copy(alpha = 0.16f)),
+        shape = RoundedCornerShape(6.dp),
+        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text,
+            color = color,
+            fontSize = 11.sp,
+            fontFamily = FontFamily.Monospace
+        )
     }
 }
 

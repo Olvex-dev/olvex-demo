@@ -40,6 +40,8 @@ commonMain.dependencies {
 }
 ```
 
+In this demo repository, SDK version is managed in one place: `gradle/libs.versions.toml` (`sdkVersion`).
+
 ---
 
 ## Setup
@@ -151,6 +153,7 @@ The test bench lets you:
 - Send custom events (including events with properties)
 - Trigger a Kotlin crash and watch it appear in the dashboard after restart
 - Trigger `SIGABRT` native crash on iOS to verify signal-based capture
+- Track verification matrix statuses for offline queue, retry recovery, restart recovery, and crash restore
 
 ---
 
