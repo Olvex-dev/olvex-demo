@@ -171,13 +171,13 @@ The test bench lets you:
 - [x] Custom events
 - [x] Persistent crash storage (survives app kill)
 - [x] Dashboard with filters and charts
-- [ ] Crash reporting (iOS)
+- [x] Crash reporting (iOS, including native signal crash marker)
 - [ ] KMP stack trace symbolication
 - [ ] dSYM upload for iOS
 - [ ] Breadcrumbs
 - [ ] User identification
-- [ ] Alerts (email / Slack)
-- [ ] Event caps / spend limits
+- [x] Alerts (email / Slack)
+- [x] Event caps / spend limits (ingest guardrails)
 
 ---
 
