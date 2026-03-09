@@ -8,7 +8,11 @@ import dev.olvex.demo.DemoConfig
 
 fun MainViewController() = ComposeUIViewController {
     LaunchedEffect(Unit) {
-        Olvex.init(apiKey = DemoConfig.apiKey)
+        runCatching {
+            Olvex.init(apiKey = DemoConfig.apiKey)
+        }.onFailure { error ->
+            println("OlvexDemo: init failed on iOS: ${error.message}")
+        }
     }
     App()
 }
